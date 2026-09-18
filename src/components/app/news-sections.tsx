@@ -6,6 +6,12 @@ import {
   EmptyHeader,
   EmptyTitle,
 } from "@/components/ui/empty";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
 import type { NewsSectionPage } from "@/features/news/types";
 
 import { NewsCard } from "./news-card";
@@ -35,34 +41,48 @@ export function NewsSections({ basePath, searchParams, sections }: NewsSectionsP
     );
   }
 
+  const initiallyOpenSection = sections.find((section) => section.total > 0)?.key;
+
   return (
-    <div className="flex flex-col gap-6">
+    <Accordion
+      defaultValue={initiallyOpenSection ? [initiallyOpenSection] : []}
+      multiple={false}
+      className="flex flex-col gap-3"
+    >
       {sections.map((section) =>
         section.total > 0 ? (
-          <section key={section.key} className="flex flex-col gap-3">
-            <div className="flex items-center justify-between">
-              <h2 className="font-heading text-lg font-semibold">
-                {section.label}
-              </h2>
-              <span className="font-mono text-xs text-muted-foreground">
-                {section.total} artikel
+          <AccordionItem
+            key={section.key}
+            value={section.key}
+            className="rounded-xl border px-4"
+          >
+            <AccordionTrigger className="py-4 hover:no-underline">
+              <span className="flex items-center gap-3">
+                <span className="font-heading text-lg font-semibold">
+                  {section.label}
+                </span>
+                <span className="font-mono text-xs text-muted-foreground">
+                  {section.total} artikel
+                </span>
               </span>
-            </div>
-            <div className="flex flex-col gap-3">
-              {section.items.map((item) => (
-                <NewsCard key={item.id} item={item} />
-              ))}
-            </div>
-            <ListPagination
-              basePath={basePath}
-              page={section.page}
-              pageCount={section.pageCount}
-              pageParam={section.pageParam}
-              searchParams={searchParams}
-            />
-          </section>
+            </AccordionTrigger>
+            <AccordionContent className="pb-4">
+              <div className="flex flex-col gap-3">
+                {section.items.map((item) => (
+                  <NewsCard key={item.id} item={item} />
+                ))}
+              </div>
+              <ListPagination
+                basePath={basePath}
+                page={section.page}
+                pageCount={section.pageCount}
+                pageParam={section.pageParam}
+                searchParams={searchParams}
+              />
+            </AccordionContent>
+          </AccordionItem>
         ) : null,
       )}
-    </div>
+    </Accordion>
   );
 }

@@ -15,7 +15,7 @@ function Pagination({ className, ...props }: React.ComponentProps<"nav">) {
       role="navigation"
       aria-label="pagination"
       data-slot="pagination"
-      className={cn("mx-auto flex w-full justify-center", className)}
+      className={cn("mt-4 mx-auto flex w-full justify-center", className)}
       {...props}
     />
   );
@@ -43,16 +43,16 @@ type PaginationLinkProps = {
   href: string;
   prefetch?: boolean;
 } & Omit<React.ComponentProps<"a">, "href"> & {
-    size?:
-      | "default"
-      | "xs"
-      | "sm"
-      | "lg"
-      | "icon"
-      | "icon-xs"
-      | "icon-sm"
-      | "icon-lg";
-  } & React.ComponentProps<"a">;
+  size?:
+  | "default"
+  | "xs"
+  | "sm"
+  | "lg"
+  | "icon"
+  | "icon-xs"
+  | "icon-sm"
+  | "icon-lg";
+} & React.ComponentProps<"a">;
 
 function PaginationLink({
   className,
