@@ -42,6 +42,7 @@ type PaginationLinkProps = {
   isActive?: boolean;
   href: string;
   prefetch?: boolean;
+  scroll?: boolean;
 } & Omit<React.ComponentProps<"a">, "href"> & {
   size?:
   | "default"

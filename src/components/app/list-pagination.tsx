@@ -44,6 +44,7 @@ export function ListPagination({ basePath, page, pageCount, pageParam = "page", 
           <PaginationPrevious
             href={hrefFor(basePath, Math.max(1, page - 1), pageParam, searchParams)}
             aria-disabled={page <= 1}
+            scroll={false}
           />
         </PaginationItem>
         {pages.map((item) => (
@@ -51,6 +52,7 @@ export function ListPagination({ basePath, page, pageCount, pageParam = "page", 
             <PaginationLink
               href={hrefFor(basePath, item, pageParam, searchParams)}
               isActive={item === page}
+              scroll={false}
             >
               {item}
             </PaginationLink>
@@ -65,6 +67,7 @@ export function ListPagination({ basePath, page, pageCount, pageParam = "page", 
               searchParams,
             )}
             aria-disabled={page >= pageCount}
+            scroll={false}
           />
         </PaginationItem>
       </PaginationContent>
