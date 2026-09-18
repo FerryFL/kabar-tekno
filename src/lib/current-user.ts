@@ -2,7 +2,7 @@ import { eq } from "drizzle-orm";
 import { cache } from "react";
 
 import { getDb, hasDatabase } from "@/db";
-import { goals, users } from "@/db/schema";
+import { users } from "@/db/schema";
 import { getSupabaseUser } from "@/lib/supabase/server";
 import { logServerTiming } from "@/lib/server-timing";
 
@@ -27,9 +27,6 @@ export const getCurrentUser = cache(async () => {
   logServerTiming("current-user.db-user-lookup", lookupStartedAt);
 
   if (authenticatedUser) {
-    const goalStartedAt = performance.now();
-    await db.insert(goals).values({ userId: authenticatedUser.id }).onConflictDoNothing({ target: goals.userId });
-    logServerTiming("current-user.ensure-goal", goalStartedAt);
     logServerTiming("current-user.total", startedAt, { existing: true });
     return authenticatedUser;
   }
@@ -46,7 +43,6 @@ export const getCurrentUser = cache(async () => {
 
   if (created) {
     logServerTiming("current-user.total", startedAt, { existing: false });
-    await db.insert(goals).values({ userId: created.id }).onConflictDoNothing({ target: goals.userId });
     return created;
   }
 
@@ -59,7 +55,6 @@ export const getCurrentUser = cache(async () => {
       existing: false,
       concurrent: true,
     });
-    await db.insert(goals).values({ userId: concurrentUser.id }).onConflictDoNothing({ target: goals.userId });
     return concurrentUser;
   }
 

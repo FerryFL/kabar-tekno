@@ -1,4 +1,4 @@
-import { and, count, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
+import { and, desc, eq, gte, ilike, lt, or, sql } from "drizzle-orm";
 
 import { getDb, hasDatabase } from "@/db";
 import { bookmarks, feedSources, news, readArticles } from "@/db/schema";
@@ -257,27 +257,6 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
   const baseWhere = and(sectionDateWhere(key), searchWhere(q));
   const where = savedOnly ? and(eq(bookmarks.userId, userId), baseWhere) : baseWhere;
 
-  const countQuery = savedOnly
-    ? db
-      .select({ total: count() })
-      .from(bookmarks)
-      .innerJoin(news, eq(bookmarks.newsId, news.id))
-      .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
-      .where(where)
-    : db
-      .select({ total: count() })
-      .from(news)
-      .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
-      .where(where);
-
-  const countStartedAt = performance.now();
-  const [{ total }] = await countQuery;
-  logServerTiming(savedOnly ? "saved-news.section.count" : "news.section.count", countStartedAt, {
-    section: key,
-  });
-
-  const page = Math.min(Math.max(requestedPage, 1), Math.max(1, Math.ceil(total / PAGE_SIZE)));
-
   const selectColumns = {
     id: news.id,
     sourceId: news.sourceId,
@@ -295,6 +274,7 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
       where ${readArticles.userId} = ${userId}
         and ${readArticles.newsId} = ${news.id}
     )`,
+    total: sql<number>`count(*) over()`,
   };
 
   const itemsQuery = savedOnly
@@ -313,11 +293,14 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
       );
 
   const selectStartedAt = performance.now();
-  const items = await itemsQuery
+  const rawItems = await itemsQuery
     .where(where)
     .orderBy(desc(news.publishedAt), desc(news.createdAt))
     .limit(PAGE_SIZE)
-    .offset((page - 1) * PAGE_SIZE);
+    .offset((Math.max(requestedPage, 1) - 1) * PAGE_SIZE);
+
+  const total = rawItems[0]?.total ?? 0;
+  const items = rawItems.map(({ total: _total, ...item }) => item);
 
   logServerTiming(savedOnly ? "saved-news.section.select" : "news.section.select", selectStartedAt, {
     section: key,

@@ -12,6 +12,11 @@ declare global {
 
 export const hasDatabase = Boolean(connectionString);
 
+const configuredPoolSize = Number.parseInt(process.env.DB_POOL_MAX ?? "2", 10);
+const poolSize = Number.isFinite(configuredPoolSize)
+  ? Math.min(Math.max(configuredPoolSize, 1), 3)
+  : 2;
+
 export function getDb() {
   if (!connectionString) {
     throw new Error("DATABASE_URL is not configured.");
@@ -19,8 +24,9 @@ export function getDb() {
 
   if (!globalThis.kabarTeknoSql) {
     globalThis.kabarTeknoSql = postgres(connectionString, {
-      max: 1,
+      max: poolSize,
       prepare: false,
+      ssl: "require",
     });
   }
 
