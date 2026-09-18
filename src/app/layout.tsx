@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { AppSidebar } from "@/components/app/app-sidebar";
+import { NavigationTiming } from "@/components/app/navigation-timing";
 import { isAdminEmail } from "@/lib/admin";
 import { getSupabaseUser } from "@/lib/supabase/server";
 import { SidebarProvider } from "@/components/ui/sidebar";
@@ -19,6 +20,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <TooltipProvider>
           <SidebarProvider>
+            <NavigationTiming />
             {user ? <AppSidebar isAdmin={isAdminEmail(user.email)} /> : null}
             <main className="flex-1">{children}</main>
           </SidebarProvider>
