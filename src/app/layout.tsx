@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { AppSidebar } from "@/components/app/app-sidebar";
 import { NavigationTiming } from "@/components/app/navigation-timing";
 import { isAdminEmail } from "@/lib/admin";
@@ -20,7 +21,9 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full">
         <TooltipProvider>
           <SidebarProvider>
-            <NavigationTiming />
+            <Suspense fallback={null}>
+              <NavigationTiming />
+            </Suspense>
             {user ? <AppSidebar isAdmin={isAdminEmail(user.email)} /> : null}
             <main className="flex-1">{children}</main>
           </SidebarProvider>
