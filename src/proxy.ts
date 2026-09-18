@@ -1,8 +1,10 @@
 import { createServerClient, parseCookieHeader } from "@supabase/ssr";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { logServerTiming } from "@/lib/server-timing";
 
 export async function proxy(request: NextRequest) {
+  const startedAt = performance.now();
   const response = NextResponse.next({ request: { headers: request.headers } });
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY ?? process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
@@ -21,7 +23,11 @@ export async function proxy(request: NextRequest) {
     },
   });
 
+  const authStartedAt = performance.now();
   const { data } = await supabase.auth.getClaims();
+  logServerTiming("proxy.supabase.getClaims", authStartedAt, {
+    pathname: request.nextUrl.pathname,
+  });
   const claims = data?.claims;
   const pathname = request.nextUrl.pathname;
   const isPublicRoute = pathname === "/login" || pathname === "/auth/callback";
@@ -37,6 +43,10 @@ export async function proxy(request: NextRequest) {
     const redirectPath = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
     return NextResponse.redirect(new URL(redirectPath, request.url));
   }
+
+  logServerTiming("proxy.total", startedAt, {
+    pathname: request.nextUrl.pathname,
+  });
 
   return response;
 }

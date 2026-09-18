@@ -4,9 +4,11 @@ import { getDb, hasDatabase } from "@/db";
 import { goals, readArticles } from "@/db/schema";
 import { getCurrentUser } from "@/lib/current-user";
 import { toDateKey } from "@/lib/dates";
+import { logServerTiming } from "@/lib/server-timing";
 import type { GoalSummary } from "@/features/news/types";
 
 export async function getGoalSummary(): Promise<GoalSummary | null> {
+  const startedAt = performance.now();
   if (!hasDatabase) {
     return null
   }
@@ -46,6 +48,8 @@ export async function getGoalSummary(): Promise<GoalSummary | null> {
     );
 
   const readsToday = readCount?.value ?? 0;
+
+  logServerTiming("goal.summary.total", startedAt);
 
   return {
     goal,

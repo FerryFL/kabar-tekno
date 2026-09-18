@@ -10,7 +10,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  compress: process.env.NODE_ENV !== "development",
+  compress: false,
 };
 
 export default nextConfig;

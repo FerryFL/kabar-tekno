@@ -1,6 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { getSupabaseConfig } from "./config";
+import { logServerTiming } from "@/lib/server-timing";
 
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -22,12 +24,22 @@ export async function createSupabaseServerClient() {
   });
 }
 
-export async function getSupabaseUser() {
+export const getSupabaseUser = cache(async () => {
+  const startedAt = performance.now();
+
   try {
     const supabase = await createSupabaseServerClient();
+    const authStartedAt = performance.now();
     const { data, error } = await supabase.auth.getUser();
+    logServerTiming("supabase.auth.getUser", authStartedAt, {
+      success: !error,
+    });
+    logServerTiming("supabase.getSupabaseUser", startedAt, {
+      success: !error,
+    });
     return error ? null : data.user;
   } catch {
+    logServerTiming("supabase.getSupabaseUser", startedAt, { success: false });
     return null;
   }
-}
+});

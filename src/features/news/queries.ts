@@ -4,6 +4,7 @@ import { getDb, hasDatabase } from "@/db";
 import { bookmarks, feedSources, news, readArticles } from "@/db/schema";
 import { getCurrentUser } from "@/lib/current-user";
 import { getJakartaDayKeys } from "@/lib/dates";
+import { logServerTiming } from "@/lib/server-timing";
 
 import type { NewsListItem, NewsSectionKey, NewsSectionPage } from "./types";
 
@@ -137,6 +138,7 @@ function searchWhere(q: string) {
 }
 
 async function getDatabaseNewsSections({ q, pages }: ListParams) {
+  const startedAt = performance.now();
   const db = getDb();
   const user = await getCurrentUser();
   if (!user) {
@@ -162,10 +164,12 @@ async function getDatabaseNewsSections({ q, pages }: ListParams) {
     ),
   );
 
+  logServerTiming("news.sections.total", startedAt, { sections: SECTION_KEYS.length });
   return buildSectionPages(results, pages);
 }
 
 async function getDatabaseSavedNewsSections({ q, pages }: ListParams) {
+  const startedAt = performance.now();
   const db = getDb();
   const user = await getCurrentUser();
   if (!user) {
@@ -191,6 +195,7 @@ async function getDatabaseSavedNewsSections({ q, pages }: ListParams) {
     ),
   );
 
+  logServerTiming("saved-news.sections.total", startedAt, { sections: SECTION_KEYS.length });
   return buildSectionPages(results, pages);
 }
 
@@ -248,6 +253,7 @@ interface QueryNewsSection {
 }
 
 async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly = false }: QueryNewsSection): Promise<SectionQueryResult> {
+  const startedAt = performance.now();
   const baseWhere = and(sectionDateWhere(key), searchWhere(q));
   const where = savedOnly ? and(eq(bookmarks.userId, userId), baseWhere) : baseWhere;
 
@@ -264,7 +270,11 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
       .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
       .where(where);
 
+  const countStartedAt = performance.now();
   const [{ total }] = await countQuery;
+  logServerTiming(savedOnly ? "saved-news.section.count" : "news.section.count", countStartedAt, {
+    section: key,
+  });
 
   const page = Math.min(Math.max(requestedPage, 1), Math.max(1, Math.ceil(total / PAGE_SIZE)));
 
@@ -302,11 +312,19 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
         and(eq(bookmarks.newsId, news.id), eq(bookmarks.userId, userId)),
       );
 
+  const selectStartedAt = performance.now();
   const items = await itemsQuery
     .where(where)
     .orderBy(desc(news.publishedAt), desc(news.createdAt))
     .limit(PAGE_SIZE)
     .offset((page - 1) * PAGE_SIZE);
+
+  logServerTiming(savedOnly ? "saved-news.section.select" : "news.section.select", selectStartedAt, {
+    section: key,
+  });
+  logServerTiming(savedOnly ? "saved-news.section.total" : "news.section.total", startedAt, {
+    section: key,
+  });
 
   return { items, total };
 }
