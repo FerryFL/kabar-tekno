@@ -41,6 +41,7 @@ function PaginationItem({ ...props }: React.ComponentProps<"li">) {
 type PaginationLinkProps = {
   isActive?: boolean;
   href: string;
+  prefetch?: boolean;
 } & Omit<React.ComponentProps<"a">, "href"> & {
     size?:
       | "default"
@@ -57,10 +58,12 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
+  prefetch = false,
   ...props
 }: PaginationLinkProps) {
   return (
     <Link
+      prefetch={prefetch}
       aria-current={isActive ? "page" : undefined}
       data-slot="pagination-link"
       data-active={isActive}

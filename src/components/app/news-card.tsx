@@ -35,7 +35,11 @@ export function NewsCard({ item }: { item: NewsListItem }) {
           </span>
         </div>
         <CardTitle className="text-lg">
-          <Link href={`/news/${item.id}`} className="hover:text-primary">
+          <Link
+            href={`/news/${item.id}`}
+            prefetch={false}
+            className="hover:text-primary"
+          >
             {item.title}
           </Link>
         </CardTitle>
@@ -59,6 +63,7 @@ export function NewsCard({ item }: { item: NewsListItem }) {
         <div className="flex items-center gap-3">
           <Link
             href={`/news/${item.id}`}
+            prefetch={false}
             className="font-mono text-xs text-primary underline-offset-4 hover:underline"
           >
             Buka artikel

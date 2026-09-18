@@ -43,7 +43,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
             <SidebarMenuButton
               size="lg"
               tooltip="KabarTekno"
-              render={<Link href="/" />}
+              render={<Link href="/" prefetch={false} />}
             >
               <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
                 <NewspaperIcon />
@@ -70,7 +70,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
                   <SidebarMenuButton
                     isActive={pathname === item.href}
                     tooltip={item.label}
-                    render={<Link href={item.href} />}
+                    render={<Link href={item.href} prefetch={false} />}
                   >
                     <item.icon />
                     <span>{item.label}</span>
@@ -92,7 +92,7 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
                       <SidebarMenuButton
                         isActive={pathname === item.href}
                         tooltip={item.label}
-                        render={<Link href={item.href} />}
+                        render={<Link href={item.href} prefetch={false} />}
                       >
                         <item.icon />
                         <span>{item.label}</span>
