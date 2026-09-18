@@ -7,6 +7,43 @@ import { toDateKey } from "@/lib/dates";
 import { logServerTiming } from "@/lib/server-timing";
 import type { GoalSummary } from "@/features/news/types";
 
+async function findGoalWithReadCount(
+  db: ReturnType<typeof getDb>,
+  userId: string,
+  today: string,
+) {
+  const [row] = await db
+    .select({
+      id: goals.id,
+      userId: goals.userId,
+      streaks: goals.streaks,
+      minimumArticle: goals.minimumArticle,
+      createdAt: goals.createdAt,
+      updatedAt: goals.updatedAt,
+      readsToday: count(readArticles.id),
+    })
+    .from(goals)
+    .leftJoin(
+      readArticles,
+      and(eq(readArticles.userId, userId), eq(readArticles.readDate, today)),
+    )
+    .where(eq(goals.userId, userId))
+    .groupBy(
+      goals.id,
+      goals.userId,
+      goals.streaks,
+      goals.minimumArticle,
+      goals.createdAt,
+      goals.updatedAt,
+    )
+    .limit(1);
+
+  if (!row) return null;
+
+  const { readsToday, ...goal } = row;
+  return { goal, readsToday };
+}
+
 export async function getGoalSummary(): Promise<GoalSummary | null> {
   const startedAt = performance.now();
   if (!hasDatabase) {
@@ -18,36 +55,23 @@ export async function getGoalSummary(): Promise<GoalSummary | null> {
   if (!user) {
     return null
   }
-  let goal = await db.query.goals.findFirst({
-    where: eq(goals.userId, user.id),
-  });
+  const today = toDateKey(new Date());
+  let summary = await findGoalWithReadCount(db, user.id, today);
 
-  if (!goal) {
-    [goal] = await db
+  if (!summary) {
+    await db
       .insert(goals)
       .values({ userId: user.id })
       .onConflictDoNothing({ target: goals.userId })
-      .returning();
-    if (!goal) {
-      goal = await db.query.goals.findFirst({
-        where: eq(goals.userId, user.id),
-      });
-    }
+      .execute();
+    summary = await findGoalWithReadCount(db, user.id, today);
   }
 
-  if (!goal) {
+  if (!summary) {
     return null;
   }
 
-  const today = toDateKey(new Date());
-  const [readCount] = await db
-    .select({ value: count() })
-    .from(readArticles)
-    .where(
-      and(eq(readArticles.userId, user.id), eq(readArticles.readDate, today)),
-    );
-
-  const readsToday = readCount?.value ?? 0;
+  const { goal, readsToday } = summary;
 
   logServerTiming("goal.summary.total", startedAt);
 
