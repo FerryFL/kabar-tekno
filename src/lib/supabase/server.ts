@@ -30,14 +30,23 @@ export const getSupabaseUser = cache(async () => {
   try {
     const supabase = await createSupabaseServerClient();
     const authStartedAt = performance.now();
-    const { data, error } = await supabase.auth.getUser();
-    logServerTiming("supabase.auth.getUser", authStartedAt, {
-      success: !error,
+    const { data, error } = await supabase.auth.getClaims();
+    const claims = data?.claims;
+    const id = claims?.sub;
+    const user = typeof id === "string"
+      ? {
+          id,
+          email: typeof claims?.email === "string" ? claims.email : null,
+        }
+      : null;
+
+    logServerTiming("supabase.auth.getClaims", authStartedAt, {
+      success: !error && user !== null,
     });
     logServerTiming("supabase.getSupabaseUser", startedAt, {
-      success: !error,
+      success: !error && user !== null,
     });
-    return error ? null : data.user;
+    return error ? null : user;
   } catch {
     logServerTiming("supabase.getSupabaseUser", startedAt, { success: false });
     return null;
