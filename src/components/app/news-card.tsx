@@ -37,8 +37,7 @@ export function NewsCard({ item }: { item: NewsListItem }) {
         <CardTitle className="text-lg">
           <Link
             href={`/news/${item.id}`}
-            prefetch={false}
-            className="hover:text-primary"
+            className="hover:text-primary focus:text-primary active:text-primary"
           >
             {item.title}
           </Link>
@@ -63,7 +62,6 @@ export function NewsCard({ item }: { item: NewsListItem }) {
         <div className="flex items-center gap-3">
           <Link
             href={`/news/${item.id}`}
-            prefetch={false}
             className="font-mono text-xs text-primary underline-offset-4 hover:underline"
           >
             Buka artikel
@@ -85,6 +83,6 @@ export function NewsCard({ item }: { item: NewsListItem }) {
           <ExternalLinkIcon data-icon="inline-end" />
         </a>
       </CardContent>
-    </Card>
+    </Card >
   );
 }

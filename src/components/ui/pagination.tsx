@@ -58,7 +58,7 @@ function PaginationLink({
   className,
   isActive,
   size = "icon",
-  prefetch = false,
+  prefetch = true,
   ...props
 }: PaginationLinkProps) {
   return (
