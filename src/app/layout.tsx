@@ -4,7 +4,7 @@ import { AppSidebar } from "@/components/app/app-sidebar";
 import { NavigationTiming } from "@/components/app/navigation-timing";
 import { isAdminEmail } from "@/lib/admin";
 import { getSupabaseUser } from "@/lib/supabase/server";
-import { SidebarProvider } from "@/components/ui/sidebar";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import "./globals.css";
 
@@ -25,7 +25,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               <NavigationTiming />
             </Suspense>
             {user ? <AppSidebar isAdmin={isAdminEmail(user.email)} /> : null}
-            <main className="flex-1">{children}</main>
+            <SidebarInset>{children}</SidebarInset>
           </SidebarProvider>
         </TooltipProvider>
       </body>

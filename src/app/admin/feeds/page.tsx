@@ -37,7 +37,7 @@ export default async function FeedAdminPage() {
         title="Kelola Sumber"
         description="Kelola sumber bacaan untuk dikonsumsi publik"
       />
-      <main className="flex-1 gap-4 p-4 md:p-6 flex flex-col">
+      <main className="flex-1 gap-4 p-4 md:p-6 flex flex-col min-w-0 w-full">
         <Card className="w-full md:w-96 md:self-center">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
@@ -66,7 +66,7 @@ export default async function FeedAdminPage() {
               Sumber bisa diubah, atau dihapus. Refresh untuk update berita terbaru
             </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-col gap-4">
+          <CardContent className="flex min-w-0 flex-col gap-4">
             <form action={refreshFeedsAction}>
               <Button type="submit" variant="secondary">
                 <RefreshCcwIcon data-icon="inline-start" />
@@ -76,11 +76,11 @@ export default async function FeedAdminPage() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nama</TableHead>
-                  <TableHead>URL</TableHead>
-                  <TableHead className="text-right">Berita</TableHead>
-                  <TableHead>Diubah pada</TableHead>
-                  <TableHead className="text-right">Aksi</TableHead>
+                  <TableHead className="min-w-48">Nama</TableHead>
+                  <TableHead className="min-w-72">URL</TableHead>
+                  <TableHead className="min-w-20 text-right">Berita</TableHead>
+                  <TableHead className="min-w-32">Diubah pada</TableHead>
+                  <TableHead className="min-w-40 text-right">Aksi</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
