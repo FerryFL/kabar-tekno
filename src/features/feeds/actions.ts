@@ -1,13 +1,14 @@
 "use server";
 
 import Parser from "rss-parser";
-import { eq } from "drizzle-orm";
+import { eq, lt } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
 import { getDb, hasDatabase } from "@/db";
 import { feedSources, news } from "@/db/schema";
 import { isAdmin } from "@/lib/admin";
+import { getJakartaDayStart } from "@/lib/dates";
 
 const feedSchema = z.object({
   name: z.string().trim().min(2).max(80),
@@ -138,6 +139,10 @@ export async function refreshFeeds() {
   }
 
   const db = getDb();
+  const retentionCutoff = getJakartaDayStart(2);
+
+  await db.delete(news).where(lt(news.publishedAt, retentionCutoff));
+
   const sources = await db.query.feedSources.findMany();
   let inserted = 0;
   const failedSources: string[] = [];
@@ -154,6 +159,9 @@ export async function refreshFeeds() {
 
         const publishedAt = parsePublishedAt(item);
         if (!publishedAt) {
+          continue;
+        }
+        if (publishedAt < retentionCutoff) {
           continue;
         }
 

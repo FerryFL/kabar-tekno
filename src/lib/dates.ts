@@ -18,6 +18,13 @@ export function getJakartaDayKeys(now = new Date()) {
   };
 }
 
+export function getJakartaDayStart(daysAgo = 0, now = new Date()) {
+  const targetDate = new Date(now.getTime() - daysAgo * 24 * 60 * 60 * 1000);
+  const dateKey = toDateKey(targetDate);
+
+  return new Date(`${dateKey}T00:00:00+07:00`);
+}
+
 export function formatShortDate(date: Date | string) {
   return new Intl.DateTimeFormat("en", {
     dateStyle: "medium",

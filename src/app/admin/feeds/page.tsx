@@ -37,8 +37,8 @@ export default async function FeedAdminPage() {
         title="Kelola Sumber"
         description="Kelola sumber bacaan untuk dikonsumsi publik"
       />
-      <main className="grid flex-1 gap-4 p-4 lg:grid-cols-12 md:p-6">
-        <Card className="col-span-4">
+      <main className="flex-1 gap-4 p-4 md:p-6 flex flex-col">
+        <Card className="w-full md:w-96 md:self-center">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <RssIcon />
@@ -59,7 +59,7 @@ export default async function FeedAdminPage() {
             </form>
           </CardContent>
         </Card>
-        <Card className="col-span-8">
+        <Card className="w-full">
           <CardHeader>
             <CardTitle>Sumber</CardTitle>
             <CardDescription>
