@@ -1,6 +1,7 @@
 import {
   Pagination,
   PaginationContent,
+  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -35,7 +36,17 @@ interface ListPagination {
 export function ListPagination({ basePath, page, pageCount, pageParam = "page", searchParams }: ListPagination) {
   if (pageCount <= 1) return null;
 
-  const pages = Array.from({ length: pageCount }, (_, index) => index + 1);
+  const visiblePageCount = Math.min(5, pageCount);
+  const pageWindowStart = Math.max(
+    1,
+    Math.min(page - Math.floor(visiblePageCount / 2), pageCount - visiblePageCount + 1),
+  );
+  const pages = Array.from(
+    { length: visiblePageCount },
+    (_, index) => pageWindowStart + index,
+  );
+  const hasPreviousPages = pageWindowStart > 1;
+  const hasNextPages = pageWindowStart + visiblePageCount - 1 < pageCount;
 
   return (
     <Pagination>
@@ -47,6 +58,11 @@ export function ListPagination({ basePath, page, pageCount, pageParam = "page", 
             scroll={false}
           />
         </PaginationItem>
+        {hasPreviousPages ? (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        ) : null}
         {pages.map((item) => (
           <PaginationItem key={item}>
             <PaginationLink
@@ -58,6 +74,11 @@ export function ListPagination({ basePath, page, pageCount, pageParam = "page", 
             </PaginationLink>
           </PaginationItem>
         ))}
+        {hasNextPages ? (
+          <PaginationItem>
+            <PaginationEllipsis />
+          </PaginationItem>
+        ) : null}
         <PaginationItem>
           <PaginationNext
             href={hrefFor(

@@ -49,7 +49,7 @@ export function SearchForm({ q, placeholder = "Cari sumber, judul, atau ringkasa
         value={value}
         onChange={(event) => setValue(event.target.value)}
         placeholder={placeholder}
-        className="font-mono"
+        className="font-mono text-xs md:text-base"
       />
       <Button type="submit" variant="secondary">
         <SearchIcon data-icon="inline-start" />
