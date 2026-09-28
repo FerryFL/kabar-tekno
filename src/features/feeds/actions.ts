@@ -139,7 +139,7 @@ export async function refreshFeeds() {
   }
 
   const db = getDb();
-  const retentionCutoff = getJakartaDayStart(2);
+  const retentionCutoff = getJakartaDayStart(7);
 
   await db.delete(news).where(lt(news.publishedAt, retentionCutoff));
 

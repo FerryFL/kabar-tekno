@@ -46,4 +46,5 @@ export async function updateGoal(formData: FormData) {
     });
 
   revalidatePath("/goals");
+  revalidatePath("/");
 }

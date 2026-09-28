@@ -6,6 +6,7 @@ import { getCurrentUser } from "@/lib/current-user";
 import { toDateKey } from "@/lib/dates";
 import { logServerTiming } from "@/lib/server-timing";
 import type { GoalSummary } from "@/features/news/types";
+import { calculateStreak } from "@/features/goals/streak";
 
 async function findGoalWithReadCount(
   db: ReturnType<typeof getDb>,
@@ -72,11 +73,26 @@ export async function getGoalSummary(): Promise<GoalSummary | null> {
   }
 
   const { goal, readsToday } = summary;
+  const completedReadDates = await db
+    .select({
+      date: readArticles.readDate,
+      count: count(),
+    })
+    .from(readArticles)
+    .where(eq(readArticles.userId, user.id))
+    .groupBy(readArticles.readDate)
+    .orderBy(desc(readArticles.readDate));
 
   logServerTiming("goal.summary.total", startedAt);
 
   return {
-    goal,
+    goal: {
+      ...goal,
+      streaks: calculateStreak(
+        completedReadDates.filter(({ count }) => count >= goal.minimumArticle),
+        today,
+      ),
+    },
     readsToday,
     completionPercent: Math.min(
       100,

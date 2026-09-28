@@ -1,4 +1,4 @@
-import { RefreshCcwIcon, RssIcon } from "lucide-react";
+import { RssIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/app/page-header";
 import { Button } from "@/components/ui/button";
@@ -22,6 +22,7 @@ import { getFeedSources } from "@/features/feeds/queries";
 import { isAdmin } from "@/lib/admin";
 import { redirect } from "next/navigation";
 import { FeedSourceRow } from "@/app/admin/feeds/feed-source-row";
+import { RefreshFeedsButton } from "@/app/admin/feeds/refresh-feeds-button";
 
 export default async function FeedAdminPage() {
   if (!(await isAdmin())) {
@@ -68,10 +69,7 @@ export default async function FeedAdminPage() {
           </CardHeader>
           <CardContent className="flex min-w-0 flex-col gap-4">
             <form action={refreshFeedsAction}>
-              <Button type="submit" variant="secondary">
-                <RefreshCcwIcon data-icon="inline-start" />
-                Refresh
-              </Button>
+              <RefreshFeedsButton />
             </form>
             <Table>
               <TableHeader>
