@@ -27,6 +27,7 @@ type RssItem = {
   guid?: string;
   enclosure?: {
     url?: string;
+    type?: string;
   };
 };
 
@@ -172,7 +173,7 @@ export async function refreshFeeds() {
             title: item.title,
             description: item.contentSnippet ?? item.content ?? null,
             link: item.link,
-            image: getItemImage(item),
+            image: getItemImage(item, source.url),
             guid: item.guid ?? null,
             publishedAt,
           })
@@ -182,7 +183,7 @@ export async function refreshFeeds() {
               sourceId: source.id,
               title: item.title,
               description: item.contentSnippet ?? item.content ?? null,
-              image: getItemImage(item),
+              image: getItemImage(item, source.url),
               guid: item.guid ?? null,
               publishedAt,
             },
@@ -230,22 +231,51 @@ function parsePublishedAt(item: RssItem) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
-function getItemImage(item: RssItem) {
-  if (item.enclosure?.url) {
-    return item.enclosure.url;
+function getItemImage(item: RssItem, feedUrl: string) {
+  const rawItem = item as RssItem & Record<string, unknown>;
+  const enclosure = item.enclosure?.url;
+
+  if (enclosure && (!item.enclosure?.type || item.enclosure.type.startsWith("image/"))) {
+    return resolveImageUrl(enclosure, feedUrl);
   }
 
-  const rawItem = item as RssItem & Record<string, unknown>;
-  const mediaContent = rawItem["media:content"];
-  if (
-    mediaContent &&
-    typeof mediaContent === "object" &&
-    "url" in mediaContent &&
-    typeof mediaContent.url === "string"
-  ) {
-    return mediaContent.url;
+  for (const key of ["media:content", "media:thumbnail", "itunes:image"]) {
+    const media = rawItem[key];
+    const url = getMediaUrl(media);
+    if (url) {
+      return resolveImageUrl(url, feedUrl);
+    }
   }
 
   const html = item.content ?? "";
-  return html.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1] ?? null;
+  const contentImage = html.match(/<img[^>]+src=["']([^"']+)["']/i)?.[1];
+  return contentImage ? resolveImageUrl(contentImage, feedUrl) : null;
+}
+
+function getMediaUrl(value: unknown): string | null {
+  if (typeof value === "string") {
+    return value;
+  }
+
+  if (Array.isArray(value)) {
+    for (const entry of value) {
+      const url = getMediaUrl(entry);
+      if (url) return url;
+    }
+  }
+
+  if (value && typeof value === "object" && "url" in value) {
+    const url = value.url;
+    return typeof url === "string" ? url : null;
+  }
+
+  return null;
+}
+
+function resolveImageUrl(imageUrl: string, feedUrl: string) {
+  try {
+    return new URL(imageUrl, feedUrl).toString();
+  } catch {
+    return imageUrl;
+  }
 }

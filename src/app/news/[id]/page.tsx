@@ -57,6 +57,17 @@ export default async function NewsDetailPage({ params }: PageProps<"/news/[id]">
           <h1 className="font-heading text-4xl font-semibold leading-tight">
             {item.title}
           </h1>
+          {item.image ? (
+            <div className="overflow-hidden rounded-xl border bg-muted">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={item.image}
+                alt=""
+                decoding="async"
+                className="max-h-128 w-full object-cover"
+              />
+            </div>
+          ) : null}
           <Card>
             <CardContent className="prose prose-invert max-w-none pt-2 text-base leading-7 text-foreground">
               <p>

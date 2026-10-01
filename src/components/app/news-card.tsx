@@ -24,6 +24,18 @@ export function NewsCard({ item }: { item: NewsListItem }) {
   return (
     <Card className="border-border/60 bg-card/70 transition-colors hover:bg-card">
       <div className="h-0.5 bg-secondary" />
+      {item.image ? (
+        <div className="overflow-hidden border-b border-border/60 bg-muted">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={item.image}
+            alt=""
+            loading="lazy"
+            decoding="async"
+            className="h-32 w-full object-cover"
+          />
+        </div>
+      ) : null}
       <CardHeader>
         <div className="flex flex-wrap items-center gap-2">
           <Badge variant="secondary" className="font-mono">
