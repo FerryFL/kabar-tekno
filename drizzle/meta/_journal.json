@@ -8,6 +8,27 @@
       "when": 1787920927337,
       "tag": "0000_dusty_aqueduct",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1791295810138,
+      "tag": "0001_peaceful_daredevil",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791354628090,
+      "tag": "0002_ambiguous_kronos",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791366458130,
+      "tag": "0003_rapid_white_tiger",
+      "breakpoints": true
     }
   ]
 }

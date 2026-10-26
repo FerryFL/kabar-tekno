@@ -1,0 +1,1 @@
+ALTER TABLE "news_labels" ADD COLUMN "label_source" text DEFAULT 'manual' NOT NULL;
