@@ -4,13 +4,14 @@ import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { ActionForm } from "@/components/app/action-form";
 import { updateGoal } from "@/features/goals/actions";
 
 export function GoalForm({ initialMinimumArticle }: { initialMinimumArticle: number }) {
   const [minimumArticle, setMinimumArticle] = useState(String(initialMinimumArticle));
 
   return (
-    <form action={updateGoal} className="flex gap-2">
+    <ActionForm action={updateGoal} className="flex gap-2">
       <Input
         type="number"
         name="minimumArticle"
@@ -20,6 +21,6 @@ export function GoalForm({ initialMinimumArticle }: { initialMinimumArticle: num
         onChange={(event) => setMinimumArticle(event.target.value)}
       />
       <Button type="submit">Ubah</Button>
-    </form>
+    </ActionForm>
   );
 }

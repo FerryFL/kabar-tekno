@@ -55,6 +55,7 @@ export const news = pgTable(
     link: text("link").notNull().unique(),
     image: text("image"),
     guid: text("guid"),
+    isArchived: boolean("is_archived").default(false).notNull(),
     publishedAt: timestamp("published_at", {
       withTimezone: true,
     }).notNull(),

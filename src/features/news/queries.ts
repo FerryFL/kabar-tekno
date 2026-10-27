@@ -90,9 +90,6 @@ export async function getNewsById(id: string) {
 
   const db = getDb();
   const user = await getCurrentUser();
-  if (!user) {
-    return null;
-  }
   const [item] = await db
     .select({
       id: news.id,
@@ -105,10 +102,10 @@ export async function getNewsById(id: string) {
       guid: news.guid,
       publishedAt: news.publishedAt,
       createdAt: news.createdAt,
-      isBookmarked: sql<boolean>`${bookmarks.id} is not null`,
+      isBookmarked: user ? sql<boolean>`${bookmarks.id} is not null` : sql<boolean>`false`,
       isRead: sql<boolean>`exists (
         select 1 from ${readArticles}
-        where ${readArticles.userId} = ${user.id}
+        where ${readArticles.userId} = ${user?.id ?? null}
           and ${readArticles.newsId} = ${news.id}
       )`,
     })
@@ -116,9 +113,12 @@ export async function getNewsById(id: string) {
     .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
     .leftJoin(
       bookmarks,
-      and(eq(bookmarks.newsId, news.id), eq(bookmarks.userId, user.id)),
+      and(eq(bookmarks.newsId, news.id), user ? eq(bookmarks.userId, user.id) : sql`false`),
     )
-    .where(eq(news.id, id))
+    .where(and(
+      eq(news.id, id),
+      or(eq(news.isArchived, false), user ? eq(bookmarks.userId, user.id) : sql`false`),
+    ))
     .limit(1);
 
   return item ?? null;
@@ -141,21 +141,12 @@ async function getDatabaseNewsSections({ q, pages }: ListParams) {
   const startedAt = performance.now();
   const db = getDb();
   const user = await getCurrentUser();
-  if (!user) {
-    return buildSectionPages(
-      SECTION_KEYS.map(() => ({
-        items: [],
-        total: 0,
-      })),
-      pages,
-    );
-  }
 
   const results = await Promise.all(
     SECTION_KEYS.map((key) =>
       queryNewsSection({
         db,
-        userId: user.id,
+        userId: user?.id ?? null,
         q,
         key,
         requestedPage: pages[key],
@@ -245,7 +236,7 @@ function jakartaDateKeyToUtc(dateKey: string) {
 
 interface QueryNewsSection {
   db: ReturnType<typeof getDb>;
-  userId: string;
+  userId: string | null;
   q: string;
   key: NewsSectionKey;
   requestedPage: number;
@@ -253,9 +244,15 @@ interface QueryNewsSection {
 }
 
 async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly = false }: QueryNewsSection): Promise<SectionQueryResult> {
+  if (savedOnly && !userId) {
+    return { items: [], total: 0 };
+  }
+
   const startedAt = performance.now();
   const baseWhere = and(sectionDateWhere(key), searchWhere(q));
-  const where = savedOnly ? and(eq(bookmarks.userId, userId), baseWhere) : baseWhere;
+  const where = savedOnly && userId
+    ? and(eq(bookmarks.userId, userId), baseWhere)
+    : and(eq(news.isArchived, false), baseWhere);
 
   const selectColumns = {
     id: news.id,
@@ -268,7 +265,9 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
     guid: news.guid,
     publishedAt: news.publishedAt,
     createdAt: news.createdAt,
-    isBookmarked: savedOnly ? sql<boolean>`true` : sql<boolean>`${bookmarks.id} is not null`,
+    isArchived: news.isArchived,
+    isBookmarked: savedOnly ? sql<boolean>`true` : userId ? sql<boolean>`${bookmarks.id} is not null` : sql<boolean>`false`,
+    isAuthenticated: userId ? sql<boolean>`true` : sql<boolean>`false`,
     isRead: sql<boolean>`exists (
       select 1 from ${readArticles}
       where ${readArticles.userId} = ${userId}
@@ -289,7 +288,7 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
       .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
       .leftJoin(
         bookmarks,
-        and(eq(bookmarks.newsId, news.id), eq(bookmarks.userId, userId)),
+        and(eq(bookmarks.newsId, news.id), userId ? eq(bookmarks.userId, userId) : sql`false`),
       );
 
   const selectStartedAt = performance.now();

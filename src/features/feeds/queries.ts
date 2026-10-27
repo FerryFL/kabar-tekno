@@ -1,4 +1,4 @@
-import { count, desc, eq } from "drizzle-orm";
+import { and, count, desc, eq } from "drizzle-orm";
 
 import { getDb, hasDatabase } from "@/db";
 import { feedSources, news } from "@/db/schema";
@@ -21,7 +21,7 @@ export async function getFeedSources(): Promise<FeedSourceSummary[]> {
       newsCount: count(news.id),
     })
     .from(feedSources)
-    .leftJoin(news, eq(news.sourceId, feedSources.id))
+    .leftJoin(news, and(eq(news.sourceId, feedSources.id), eq(news.isArchived, false)))
     .groupBy(feedSources.id)
     .orderBy(desc(feedSources.createdAt));
 }

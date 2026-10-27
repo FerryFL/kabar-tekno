@@ -4,6 +4,7 @@ import { useState } from "react";
 import { SaveIcon, Trash2Icon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { ActionForm } from "@/components/app/action-form";
 import { Input } from "@/components/ui/input";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { deleteFeedSource, updateFeedSource } from "@/features/feeds/actions";
@@ -18,9 +19,9 @@ export function FeedSourceRow({ source }: { source: FeedSourceSummary }) {
   return (
     <TableRow>
       <TableCell className="font-medium">
-        <form id={formId} action={updateFeedSource}>
+        <ActionForm id={formId} action={updateFeedSource}>
           <input type="hidden" name="id" value={source.id} />
-        </form>
+        </ActionForm>
         <Input
           form={formId}
           name="name"
@@ -49,7 +50,7 @@ export function FeedSourceRow({ source }: { source: FeedSourceSummary }) {
             <SaveIcon />
             Simpan
           </Button>
-          <form
+          <ActionForm
             action={deleteFeedSource}
             onSubmit={(event) => {
               if (!window.confirm(`Delete ${source.name}? Its news will also be removed.`)) {
@@ -62,7 +63,7 @@ export function FeedSourceRow({ source }: { source: FeedSourceSummary }) {
               <Trash2Icon />
               Hapus
             </Button>
-          </form>
+          </ActionForm>
         </div>
       </TableCell>
     </TableRow>

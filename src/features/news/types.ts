@@ -3,6 +3,7 @@ import type { FeedSource, Goal, News } from "@/db/schema";
 export interface NewsListItem extends News {
   sourceName: string;
   isBookmarked: boolean;
+  isAuthenticated?: boolean;
   isRead?: boolean;
 }
 

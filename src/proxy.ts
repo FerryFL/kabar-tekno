@@ -30,18 +30,14 @@ export async function proxy(request: NextRequest) {
   });
   const claims = data?.claims;
   const pathname = request.nextUrl.pathname;
-  const isPublicRoute = pathname === "/login" || pathname === "/auth/callback";
-
-  if (!claims && !isPublicRoute) {
-    const loginUrl = new URL("/login", request.url);
-    loginUrl.searchParams.set("next", `${pathname}${request.nextUrl.search}`);
-    return NextResponse.redirect(loginUrl);
-  }
-
   if (claims && pathname === "/login") {
     const next = request.nextUrl.searchParams.get("next");
     const redirectPath = next?.startsWith("/") && !next.startsWith("//") ? next : "/";
     return NextResponse.redirect(new URL(redirectPath, request.url));
+  }
+
+  if (pathname === "/login") {
+    return NextResponse.redirect(new URL("/saved", request.url));
   }
 
   logServerTiming("proxy.total", startedAt, {

@@ -9,10 +9,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { toggleBookmark } from "@/features/news/actions";
 import { getNewsById } from "@/features/news/queries";
 import { formatShortDate } from "@/lib/dates";
+import { getCurrentUser } from "@/lib/current-user";
 import { MarkAsRead } from "../mark-as-read";
 
 export default async function NewsDetailPage({ params }: PageProps<"/news/[id]">) {
   const { id } = await params;
+  const user = await getCurrentUser();
   const item = await getNewsById(id);
 
   if (!item) {
@@ -77,15 +79,17 @@ export default async function NewsDetailPage({ params }: PageProps<"/news/[id]">
             </CardContent>
           </Card>
           <div className="flex flex-wrap gap-2">
-            <form action={toggleBookmark.bind(null, item.id)}>
-              <Button
-                type="submit"
-                variant={item.isBookmarked ? "default" : "outline"}
-              >
-                <BookmarkIcon data-icon="inline-start" />
-                {item.isBookmarked ? "Disimpan" : "Simpan"}
-              </Button>
-            </form>
+            {user ? (
+              <form action={toggleBookmark.bind(null, item.id)}>
+                <Button
+                  type="submit"
+                  variant={item.isBookmarked ? "default" : "outline"}
+                >
+                  <BookmarkIcon data-icon="inline-start" />
+                  {item.isBookmarked ? "Disimpan" : "Simpan"}
+                </Button>
+              </form>
+            ) : null}
             <Button
               nativeButton={false}
               render={<a href={item.link} target="_blank" rel="noreferrer" />}

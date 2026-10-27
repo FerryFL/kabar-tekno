@@ -7,7 +7,6 @@ import {
   EmptyTitle,
 } from "@/components/ui/empty";
 import {
-  Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
@@ -15,6 +14,7 @@ import {
 import type { NewsSectionPage } from "@/features/news/types";
 
 import { NewsCard } from "./news-card";
+import { NewsSectionsAccordion } from "./news-sections-accordion";
 import { Newspaper } from "lucide-react";
 
 interface NewsSectionsProps {
@@ -44,10 +44,9 @@ export function NewsSections({ basePath, searchParams, sections }: NewsSectionsP
   const initiallyOpenSection = sections.find((section) => section.total > 0)?.key;
 
   return (
-    <Accordion
-      defaultValue={initiallyOpenSection ? [initiallyOpenSection] : []}
-      multiple={false}
-      className="flex flex-col gap-3"
+    <NewsSectionsAccordion
+      key={initiallyOpenSection ?? "no-open-section"}
+      initiallyOpenSection={initiallyOpenSection}
     >
       {sections.map((section) =>
         section.total > 0 ? (
@@ -83,6 +82,6 @@ export function NewsSections({ basePath, searchParams, sections }: NewsSectionsP
           </AccordionItem>
         ) : null,
       )}
-    </Accordion>
+    </NewsSectionsAccordion>
   );
 }

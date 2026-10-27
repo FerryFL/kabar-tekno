@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 
 import { toggleBookmark } from "@/features/news/actions";
+import { ActionForm } from "@/components/app/action-form";
 import type { NewsListItem } from "@/features/news/types";
 import { formatShortDate, formatTime } from "@/lib/dates";
 import { Badge } from "@/components/ui/badge";
@@ -57,18 +58,20 @@ export function NewsCard({ item }: { item: NewsListItem }) {
         <CardDescription className="line-clamp-2">
           {item.description ?? "No summary is available for this article."}
         </CardDescription>
-        <CardAction>
-          <form action={toggleBookmark.bind(null, item.id)}>
-            <Button
-              type="submit"
-              size="icon-sm"
-              variant={item.isBookmarked ? "default" : "outline"}
-              aria-label={item.isBookmarked ? "Remove bookmark" : "Save news"}
-            >
-              <BookmarkIcon />
-            </Button>
-          </form>
-        </CardAction>
+        {item.isAuthenticated ? (
+          <CardAction>
+            <ActionForm action={toggleBookmark.bind(null, item.id)}>
+              <Button
+                type="submit"
+                size="icon-sm"
+                variant={item.isBookmarked ? "default" : "outline"}
+                aria-label={item.isBookmarked ? "Remove bookmark" : "Save news"}
+              >
+                <BookmarkIcon />
+              </Button>
+            </ActionForm>
+          </CardAction>
+        ) : null}
       </CardHeader>
       <CardContent className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-3">

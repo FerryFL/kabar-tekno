@@ -6,6 +6,7 @@ import { isAdminEmail } from "@/lib/admin";
 import { getSupabaseUser } from "@/lib/supabase/server";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { Toaster } from "@/components/ui/toast";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -20,13 +21,15 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className="dark h-full antialiased">
       <body className="min-h-full">
         <TooltipProvider>
-          <SidebarProvider>
-            <Suspense fallback={null}>
-              <NavigationTiming />
-            </Suspense>
-            {user ? <AppSidebar isAdmin={isAdminEmail(user.email)} /> : null}
-            <SidebarInset>{children}</SidebarInset>
-          </SidebarProvider>
+          <Toaster>
+            <SidebarProvider>
+              <Suspense fallback={null}>
+                <NavigationTiming />
+              </Suspense>
+              <AppSidebar isAdmin={user ? isAdminEmail(user.email) : false} />
+              <SidebarInset>{children}</SidebarInset>
+            </SidebarProvider>
+          </Toaster>
         </TooltipProvider>
       </body>
     </html>

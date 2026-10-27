@@ -1,6 +1,7 @@
 import { ActivityIcon, FlameIcon, TargetIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/app/page-header";
+import { GoogleAuthButton } from "@/components/app/google-auth-button";
 import { GoalForm } from "@/app/goals/goal-form";
 import {
   Card,
@@ -18,8 +19,35 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getGoalSummary, getRecentReadDates } from "@/features/goals/queries";
+import { getCurrentUser } from "@/lib/current-user";
 
 export default async function GoalsPage() {
+  const user = await getCurrentUser();
+  if (!user) {
+    return (
+      <>
+        <PageHeader
+          eyebrow="Progres Target"
+          title="Target"
+          description="Masuk untuk melihat dan mengatur target bacaanmu."
+        />
+        <main className="flex flex-1 items-start justify-center p-4 md:p-6">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <CardTitle>Masuk untuk melihat target bacaan</CardTitle>
+              <CardDescription>
+                Progres bacaan dan streak tersimpan di akunmu.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <GoogleAuthButton next="/goals" className="w-full" />
+            </CardContent>
+          </Card>
+        </main>
+      </>
+    );
+  }
+
   const [summary, recentDates] = await Promise.all([
     getGoalSummary(),
     getRecentReadDates(),

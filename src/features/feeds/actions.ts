@@ -29,9 +29,33 @@ type RssItem = {
     url?: string;
     type?: string;
   };
+  "media:content"?: RssMediaValue | RssMediaValue[];
+  "media:thumbnail"?: RssMediaValue | RssMediaValue[];
+  "itunes:image"?: RssMediaValue | RssMediaValue[];
 };
 
-const parser = new Parser<Record<string, unknown>, RssItem>();
+type RssMediaValue = {
+  url?: string;
+  href?: string;
+  $?: {
+    url?: string;
+    href?: string;
+  };
+};
+
+const parser = new Parser<Record<string, unknown>, RssItem>({
+  headers: {
+    Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+    "User-Agent": "KabarTekno RSS Reader/1.0",
+  },
+  customFields: {
+    item: [
+      ["media:content", "media:content", { keepArray: true }],
+      ["media:thumbnail", "media:thumbnail", { keepArray: true }],
+      ["itunes:image", "itunes:image", { keepArray: true }],
+    ],
+  },
+});
 
 export async function createFeedSource(formData: FormData) {
   if (!(await isAdmin())) {
@@ -142,7 +166,10 @@ export async function refreshFeeds() {
   const db = getDb();
   const retentionCutoff = getJakartaDayStart(7);
 
-  await db.delete(news).where(lt(news.publishedAt, retentionCutoff));
+  await db
+    .update(news)
+    .set({ isArchived: true })
+    .where(lt(news.publishedAt, retentionCutoff));
 
   const sources = await db.query.feedSources.findMany();
   let inserted = 0;
@@ -150,7 +177,7 @@ export async function refreshFeeds() {
 
   for (const source of sources.filter((item) => item.isActive)) {
     try {
-      const feed = await parser.parseURL(source.url);
+      const feed = await fetchAndParseFeed(source.url);
       const items = feed.items.slice(0, 25);
 
       for (const item of items) {
@@ -195,7 +222,8 @@ export async function refreshFeeds() {
         .update(feedSources)
         .set({ updatedAt: new Date() })
         .where(eq(feedSources.id, source.id));
-    } catch {
+    } catch (error) {
+      console.error("Feed refresh failed for source", { sourceId: source.id, source: source.name, error });
       failedSources.push(source.name);
     }
   }
@@ -205,6 +233,7 @@ export async function refreshFeeds() {
   revalidatePath("/admin/feeds");
 
   if (failedSources.length > 0 && inserted === 0) {
+    console.error("Feed refresh failed", { failedSources, inserted });
     return {
       ok: false,
       message: `Could not refresh: ${failedSources.join(", ")}.`,
@@ -229,6 +258,24 @@ function parsePublishedAt(item: RssItem) {
 
   const date = new Date(value);
   return Number.isNaN(date.getTime()) ? null : date;
+}
+
+async function fetchAndParseFeed(feedUrl: string) {
+  const response = await fetch(feedUrl, {
+    cache: "no-store",
+    headers: {
+      Accept: "application/rss+xml, application/xml, text/xml;q=0.9, */*;q=0.8",
+      "User-Agent": "KabarTekno RSS Reader/1.0",
+    },
+  });
+
+  if (!response.ok) {
+    const retryAfter = response.headers.get("retry-after");
+    const retryMessage = retryAfter ? ` Retry-After: ${retryAfter}.` : "";
+    throw new Error(`Feed returned HTTP ${response.status}.${retryMessage}`);
+  }
+
+  return parser.parseString(await response.text());
 }
 
 function getItemImage(item: RssItem, feedUrl: string) {
@@ -264,8 +311,10 @@ function getMediaUrl(value: unknown): string | null {
     }
   }
 
-  if (value && typeof value === "object" && "url" in value) {
-    const url = value.url;
+  if (value && typeof value === "object") {
+    const media = value as RssMediaValue;
+    const url = media.url ?? media.href ?? media.$?.url ?? media.$?.href;
+
     return typeof url === "string" ? url : null;
   }
 

@@ -21,7 +21,7 @@ export default async function HomePage({ searchParams }: PageProps<"/">) {
       />
       <main className="flex flex-1 flex-col gap-6 p-4 lg:p-6">
         <div className="grid gap-4 lg:grid-cols-12">
-          <div className="flex flex-col gap-4 lg:col-span-9">
+          <div className={`flex flex-col gap-4 ${goal ? "lg:col-span-9" : "lg:col-span-12"}`}>
             <SearchForm q={params.q} placeholder="Cari sumber, judul, atau ringkasan" />
             <NewsSections
               basePath="/"

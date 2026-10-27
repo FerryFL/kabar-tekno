@@ -1,6 +1,7 @@
 import { RssIcon } from "lucide-react";
 
 import { PageHeader } from "@/components/app/page-header";
+import { ActionForm } from "@/components/app/action-form";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -48,7 +49,7 @@ export default async function FeedAdminPage() {
             <CardDescription>Gunakan sumber yang menyediakan public xml</CardDescription>
           </CardHeader>
           <CardContent>
-            <form action={createFeedSource} className="flex flex-col gap-3">
+            <ActionForm action={createFeedSource} className="flex flex-col gap-3">
               <Input name="name" placeholder="Nama Sumber" required />
               <Input
                 name="url"
@@ -57,7 +58,7 @@ export default async function FeedAdminPage() {
                 required
               />
               <Button type="submit">Add source</Button>
-            </form>
+            </ActionForm>
           </CardContent>
         </Card>
         <Card className="w-full">
@@ -68,9 +69,9 @@ export default async function FeedAdminPage() {
             </CardDescription>
           </CardHeader>
           <CardContent className="flex min-w-0 flex-col gap-4">
-            <form action={refreshFeedsAction}>
+            <ActionForm action={refreshFeedsAction}>
               <RefreshFeedsButton />
-            </form>
+            </ActionForm>
             <Table>
               <TableHeader>
                 <TableRow>
