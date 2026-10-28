@@ -117,13 +117,13 @@ export function GoogleAuthButton({
             )}
             <span className="min-w-0 ps-1 truncate">{displayName}</span>
           </Button>
-          <Button type="button" variant="destructive" size="sm" className="w-full justify-start bg-destructive text-destructive-foreground hover:bg-destructive/90 p-4" onClick={signOut} disabled={isLoading}>
+          <Button type="button" variant="destructive" size="sm" className="w-full justify-start bg-destructive text-destructive-foreground hover:bg-destructive/90 p-4 py-5" onClick={signOut} disabled={isLoading}>
             <LogOutIcon />
             <span>{isLoading ? "Mengeluarkan..." : "Keluar"}</span>
           </Button>
         </>
       ) : (
-        <Button type="button" variant="outline" size={className ? "lg" : "sm"} className={className ?? "w-full justify-start"} onClick={signInWithGoogle} disabled={isLoading}>
+        <Button type="button" variant="outline" size={className ? "lg" : "sm"} className={className ?? "w-full justify-start py-6"} onClick={signInWithGoogle} disabled={isLoading}>
           <GoogleIcon />
           <span>{isLoading ? "Menghubungkan..." : "Koneksi Akun Google"}</span>
         </Button>
