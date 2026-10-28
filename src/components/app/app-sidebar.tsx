@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
   BookmarkIcon,
@@ -45,8 +46,14 @@ export function AppSidebar({ isAdmin }: { isAdmin: boolean }) {
               tooltip="KabarTekno"
               render={<Link href="/" />}
             >
-              <div className="flex size-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-                <NewspaperIcon />
+              <div className="size-8 overflow-hidden rounded-lg">
+                <Image
+                  src="/kabartekno.jpg"
+                  alt=""
+                  width={32}
+                  height={32}
+                  className="size-full object-cover"
+                />
               </div>
               <div className="flex min-w-0 flex-col">
                 <span className="truncate font-heading text-sm font-semibold">
