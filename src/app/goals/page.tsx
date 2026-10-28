@@ -20,6 +20,29 @@ import {
 } from "@/components/ui/table";
 import { getGoalSummary, getRecentReadDates } from "@/features/goals/queries";
 import { getCurrentUser } from "@/lib/current-user";
+import { toDateKey } from "@/lib/dates";
+
+function getLastSevenDays() {
+  const today = toDateKey(new Date());
+  const [year, month, day] = today.split("-").map(Number);
+  const todayUtc = Date.UTC(year, month - 1, day);
+  const weekdayLabels = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
+
+  return Array.from({ length: 7 }, (_, index) => {
+    const date = new Date(todayUtc - (6 - index) * 24 * 60 * 60 * 1000);
+    const dateKey = [
+      date.getUTCFullYear(),
+      String(date.getUTCMonth() + 1).padStart(2, "0"),
+      String(date.getUTCDate()).padStart(2, "0"),
+    ].join("-");
+
+    return {
+      dateKey,
+      label: index === 6 ? "Hari Ini" : weekdayLabels[date.getUTCDay()],
+      dayNumber: date.getUTCDate(),
+    };
+  });
+}
 
 export default async function GoalsPage() {
   const user = await getCurrentUser();
@@ -52,6 +75,8 @@ export default async function GoalsPage() {
     getGoalSummary(),
     getRecentReadDates(),
   ]);
+  const lastSevenDays = getLastSevenDays();
+  const readsByDate = new Map(recentDates.map(({ date, count }) => [date, count]));
 
   return (
     <>
@@ -114,14 +139,46 @@ export default async function GoalsPage() {
                   Streak
                 </CardTitle>
                 <CardDescription>
-                  Baca kabar harian secara konsisten
+                  7 hari terakhir
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <p className="font-heading text-5xl font-semibold">
-                  {summary.goal.streaks}
-                </p>
-                <p className="text-sm text-muted-foreground">hari</p>
+              <CardContent className="flex flex-col gap-4">
+                <div className="flex items-baseline gap-2">
+                  <p className="font-heading text-5xl font-semibold">
+                    {summary.goal.streaks}
+                  </p>
+                  <p className="text-sm text-muted-foreground">hari berturut-turut</p>
+                </div>
+                <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+                  {lastSevenDays.map(({ dateKey, label, dayNumber }, index) => {
+                    const isComplete =
+                      (readsByDate.get(dateKey) ?? 0) >= summary.goal.minimumArticle;
+
+                    return (
+                      <div
+                        key={dateKey}
+                        className="flex min-w-0 flex-col items-center gap-2"
+                      >
+                        <span className="truncate text-[10px] text-muted-foreground sm:text-xs">
+                          {label}
+                        </span>
+                        <span
+                          aria-label={`${index === 6 ? "Hari ini" : label}, ${isComplete ? "target selesai" : `tanggal ${dayNumber}, target belum selesai`}`}
+                          className={`flex size-8 items-center justify-center rounded-full text-xs font-semibold tabular-nums sm:size-9 ${isComplete
+                            ? "bg-secondary text-secondary-foreground shadow-sm shadow-secondary/30"
+                            : "border border-border bg-muted/50 text-muted-foreground"
+                            }`}
+                        >
+                          {isComplete ? (
+                            <FlameIcon className="size-4 fill-current" aria-hidden="true" />
+                          ) : (
+                            dayNumber
+                          )}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </CardContent>
             </Card>
             <Card>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDownIcon } from "lucide-react";
+import { ChevronDownIcon, FlameIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -48,7 +48,7 @@ export function DailyGoalCard({
           </CollapsibleTrigger>
         </CardHeader>
         <CollapsibleContent>
-          <CardContent className="flex flex-col gap-2 lg:gap-3">
+          <CardContent className="flex flex-col gap-4 lg:gap-5">
             <div className="flex items-end gap-2">
               <span className="font-heading text-4xl font-semibold">
                 {readsToday}
@@ -59,13 +59,22 @@ export function DailyGoalCard({
             </div>
             <div className="h-2 overflow-hidden rounded-full bg-muted">
               <div
-                className="h-full bg-secondary"
+                className="h-full rounded-full bg-secondary transition-[width] duration-700"
                 style={{ width: `${completionPercent}%` }}
               />
             </div>
-            <p className="text-sm text-muted-foreground">
-              Streak berlangsung: {streaks} hari
-            </p>
+            <div className="flex items-center justify-between border-t pt-3">
+              <div className="flex items-center gap-2 text-sm text-muted-foreground py-1">
+                <FlameIcon
+                  className="size-4 text-secondary"
+                  aria-hidden="true"
+                />
+                <span>Streak aktif</span>
+              </div>
+              <span className="font-heading text-sm font-semibold tabular-nums">
+                {streaks} hari
+              </span>
+            </div>
           </CardContent>
         </CollapsibleContent>
       </Card>
