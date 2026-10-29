@@ -10,11 +10,7 @@ function dateKeyToDayNumber(dateKey: string) {
   return Date.UTC(year, month - 1, day) / MILLISECONDS_PER_DAY;
 }
 
-/**
- * A completed day keeps the streak alive for the following day. A second
- * consecutive missed day resets it, so completed days may be two calendar
- * days apart while they are part of the same streak.
- */
+/** Counts only consecutive completed calendar days, with no missed-day gaps. */
 export function calculateStreak(
   completedReadDates: CompletedReadDate[],
   today: string,
@@ -30,7 +26,7 @@ export function calculateStreak(
   }
 
   const latestCompletedDay = completedDays[0];
-  if (dateKeyToDayNumber(today) - latestCompletedDay > 2) {
+  if (dateKeyToDayNumber(today) - latestCompletedDay > 1) {
     return 0;
   }
 
@@ -38,7 +34,7 @@ export function calculateStreak(
   for (let index = 1; index < completedDays.length; index += 1) {
     const gap = completedDays[index - 1] - completedDays[index];
 
-    if (gap > 2) {
+    if (gap > 1) {
       break;
     }
 
