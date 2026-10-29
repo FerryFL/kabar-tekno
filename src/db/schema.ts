@@ -110,7 +110,7 @@ export const goals = pgTable(
         onUpdate: "cascade",
       }),
     streaks: integer("streaks").default(0).notNull(),
-    minimumArticle: integer("minimum_article").default(10).notNull(),
+    minimumArticle: integer("minimum_article").default(1).notNull(),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),

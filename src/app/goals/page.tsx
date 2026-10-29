@@ -187,7 +187,7 @@ export default async function GoalsPage() {
                   <ActivityIcon />
                   Minimal Bacaan
                 </CardTitle>
-                <CardDescription>10 bacaan per hari juga udah cukup kok</CardDescription>
+                <CardDescription>Atur jumlah bacaan minimum per hari</CardDescription>
               </CardHeader>
               <CardContent>
                 <GoalForm
