@@ -34,11 +34,11 @@ select cron.schedule(
   'kabar-tekno-delete-old-unsaved-news',
   '0 20 * * *',
   $$
-    delete from public.news as n
+    delete from public.tekno_news as n
     where n.published_at < now() - interval '7 days'
       and not exists (
         select 1
-        from public.bookmarks as b
+        from public.tekno_bookmarks as b
         where b.news_id = n.id
       );
   $$

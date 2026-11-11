@@ -10,7 +10,7 @@ import {
   uuid,
 } from "drizzle-orm/pg-core";
 
-export const users = pgTable("users", {
+export const users = pgTable("tekno_users", {
   id: uuid("id").defaultRandom().primaryKey(),
   username: text("username").notNull().unique(),
   supabaseUserId: text("supabase_user_id").unique(),
@@ -18,10 +18,10 @@ export const users = pgTable("users", {
   createdAt: timestamp("created_at", { withTimezone: true })
     .defaultNow()
     .notNull(),
-});
+}).enableRLS();
 
 export const feedSources = pgTable(
-  "feed_sources",
+  "tekno_feed_sources",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     name: text("name").notNull(),
@@ -35,13 +35,13 @@ export const feedSources = pgTable(
       .notNull(),
   },
   (table) => [
-    index("feed_sources_active_idx").on(table.isActive),
-    uniqueIndex("feed_sources_url_idx").on(table.url),
+    index("tekno_feed_sources_active_idx").on(table.isActive),
+    uniqueIndex("tekno_feed_sources_url_idx").on(table.url),
   ],
-);
+).enableRLS();
 
 export const news = pgTable(
-  "news",
+  "tekno_news",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     sourceId: uuid("source_id")
@@ -64,14 +64,14 @@ export const news = pgTable(
       .notNull(),
   },
   (table) => [
-    index("news_source_id_idx").on(table.sourceId),
-    index("news_published_at_idx").on(table.publishedAt),
-    uniqueIndex("news_link_idx").on(table.link),
+    index("tekno_news_source_id_idx").on(table.sourceId),
+    index("tekno_news_published_at_idx").on(table.publishedAt),
+    uniqueIndex("tekno_news_link_idx").on(table.link),
   ],
-);
+).enableRLS();
 
 export const bookmarks = pgTable(
-  "bookmarks",
+  "tekno_bookmarks",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
@@ -91,15 +91,15 @@ export const bookmarks = pgTable(
       .notNull(),
   },
   (table) => [
-    index("bookmarks_user_id_idx").on(table.userId),
-    index("bookmarks_news_id_idx").on(table.newsId),
-    index("bookmarks_created_at_idx").on(table.createdAt),
-    uniqueIndex("bookmarks_user_news_idx").on(table.userId, table.newsId),
+    index("tekno_bookmarks_user_id_idx").on(table.userId),
+    index("tekno_bookmarks_news_id_idx").on(table.newsId),
+    index("tekno_bookmarks_created_at_idx").on(table.createdAt),
+    uniqueIndex("tekno_bookmarks_user_news_idx").on(table.userId, table.newsId),
   ],
-);
+).enableRLS();
 
 export const goals = pgTable(
-  "goals",
+  "tekno_goals",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
@@ -118,11 +118,11 @@ export const goals = pgTable(
       .defaultNow()
       .notNull(),
   },
-  (table) => [index("goals_user_id_idx").on(table.userId)],
-);
+  (table) => [index("tekno_goals_user_id_idx").on(table.userId)],
+).enableRLS();
 
 export const readArticles = pgTable(
-  "read_articles",
+  "tekno_read_articles",
   {
     id: uuid("id").defaultRandom().primaryKey(),
     userId: uuid("user_id")
@@ -141,16 +141,16 @@ export const readArticles = pgTable(
     readDate: date("read_date").notNull(),
   },
   (table) => [
-    index("read_articles_user_id_idx").on(table.userId),
-    index("read_articles_news_id_idx").on(table.newsId),
-    index("read_articles_user_date_idx").on(table.userId, table.readDate),
-    uniqueIndex("read_articles_user_news_date_idx").on(
+    index("tekno_read_articles_user_id_idx").on(table.userId),
+    index("tekno_read_articles_news_id_idx").on(table.newsId),
+    index("tekno_read_articles_user_date_idx").on(table.userId, table.readDate),
+    uniqueIndex("tekno_read_articles_user_news_date_idx").on(
       table.userId,
       table.newsId,
       table.readDate,
     ),
   ],
-);
+).enableRLS();
 
 export type User = typeof users.$inferSelect;
 export type FeedSource = typeof feedSources.$inferSelect;
