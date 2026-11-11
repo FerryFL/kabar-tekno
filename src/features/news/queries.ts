@@ -103,11 +103,13 @@ export async function getNewsById(id: string) {
       publishedAt: news.publishedAt,
       createdAt: news.createdAt,
       isBookmarked: user ? sql<boolean>`${bookmarks.id} is not null` : sql<boolean>`false`,
-      isRead: sql<boolean>`exists (
-        select 1 from ${readArticles}
-        where ${readArticles.userId} = ${user?.id ?? null}
-          and ${readArticles.newsId} = ${news.id}
-      )`,
+      isRead: user
+        ? sql<boolean>`exists (
+            select 1 from ${readArticles}
+            where ${readArticles.userId} = ${user.id}
+              and ${readArticles.newsId} = ${news.id}
+          )`
+        : sql<boolean>`false`,
     })
     .from(news)
     .innerJoin(feedSources, eq(news.sourceId, feedSources.id))
@@ -268,11 +270,13 @@ async function queryNewsSection({ db, userId, q, key, requestedPage, savedOnly =
     isArchived: news.isArchived,
     isBookmarked: savedOnly ? sql<boolean>`true` : userId ? sql<boolean>`${bookmarks.id} is not null` : sql<boolean>`false`,
     isAuthenticated: userId ? sql<boolean>`true` : sql<boolean>`false`,
-    isRead: sql<boolean>`exists (
-      select 1 from ${readArticles}
-      where ${readArticles.userId} = ${userId}
-        and ${readArticles.newsId} = ${news.id}
-    )`,
+    isRead: userId
+      ? sql<boolean>`exists (
+          select 1 from ${readArticles}
+          where ${readArticles.userId} = ${userId}
+            and ${readArticles.newsId} = ${news.id}
+        )`
+      : sql<boolean>`false`,
     total: sql<number>`count(*) over()`,
   };
 
